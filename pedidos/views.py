@@ -1,6 +1,8 @@
 from django.shortcuts import render, HttpResponse, redirect
 from .models import Produto, Cliente, ItemPedidos, Pedidos
 from .forms import ProdutoForm, ClienteForm
+from decimal import Decimal
+from django.db.models import Sum
 # Create your views here.
 def home(request):
   return render(request, 'home.html')
@@ -73,8 +75,6 @@ def EditarProduto(request, id):
       form.save()
       return redirect('listarproduto')
 ##### Pedidos ####
-def ProcessarFormulario(request):
-  return HttpResponse('Processando formulário...')
 
 def criar_pedido(request):
     if request.method == 'POST':
@@ -94,14 +94,16 @@ def criar_pedido(request):
             produto_id = int(produto_id)
             quantidade = int(quantidade)
             produto = Produto.objects.get(pk=produto_id)
+            preco = produto.preco
             total += produto.preco * quantidade
-            ItemPedidos.objects.create(pedido=pedido, produto=produto, quantidade=quantidade)
+            ItemPedidos.objects.create(pedido=pedido, produto=produto, quantidade=quantidade, preco=preco)
 
         # Atualizar o total do pedido
         pedido.total = total
         pedido.save()
 
-        return HttpResponse('Pedido criado com sucesso!')
+        # return HttpResponse('Pedido criado com sucesso!')
+        return redirect('listarpedidos')
     else:
         return HttpResponse('Método não permitido!')
 
@@ -111,6 +113,36 @@ def ListarPedidos(request):
 
 def PedidoDetalhes(request, id):
     itens = ItemPedidos.objects.filter(pedido=id)
-    total = Pedidos.objects.get(id=id).total
-    return render(request, 'pedido/PedidoDetalhes.html', {'itens': itens, 'total': total})
+    cliente = Pedidos.objects.get(id=id).cliente
+    data = Pedidos.objects.get(id=id).datacreation
+    total = Decimal(0)
+    pedido = str(id).zfill(5)
+    for item in itens:
+        item.total = item.quantidade * item.produto.preco
+        total += item.total
+    context = {'itens': itens, 'total': total, 'data': data, 'cliente': cliente, 'pedido': pedido}
+    return render(request, 'pedido/PedidoDetalhes.html', context)
+
+def criarPedidos(request):
+  produtos = Produto.objects.all()
+  clientes = Cliente.objects.all()
+  return render(request, 'pedido/criarPedidos.html', {'produtos': produtos, 'clientes': clientes})
+
+def pedidos_por_cliente(request):
+    # Agrupando os pedidos por cliente e calculando o total de cada cliente
+    pedidos_por_cliente = Pedidos.objects.values('cliente__id','cliente__nome').annotate(total_pedido=Sum('total'))
+
+    return render(request, 'pedido/pedidos_por_cliente.html', {'pedidos_por_cliente': pedidos_por_cliente})
+
+def detalhar_pedidos_por_cliente(request, cliente_id):
+    pedidos = Pedidos.objects.filter(cliente_id=int(cliente_id))
+    total = Decimal(0)
+    for item in pedidos:
+        total = total + item.total
+    context = {
+      'pedidos': pedidos,
+      'total': total
+      }
+    return render(request, 'pedido/detalhar_pedidos_por_cliente.html', context)
     
+  

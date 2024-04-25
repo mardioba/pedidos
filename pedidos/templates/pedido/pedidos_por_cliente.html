@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}Pedidos por cliente{% endblock title %}
+
+{% block content %}
+<div class='container text-center'>
+<div class='row justify-content-md-center'>
+<div class='col col-lg-2'>
+</div>
+<div class='col-md-auto'>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Cliente</th>
+                <th scope="col">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos_por_cliente %}
+            <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
+                <th scope="row"><a href="{% url 'detalhar_pedidos_por_cliente' pedido.cliente__id %}">{{ pedido.cliente__id }}</a></th>
+                <th scope="row">{{ pedido.cliente__nome }}</th>
+                <td style="padding-left: 10px;">R$ {{ pedido.total_pedido|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+    </table>
+</div>
+<div class='col col-lg-2'>
+</div>
+</div>
+{% endblock content %}

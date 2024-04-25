@@ -8,6 +8,7 @@
   <div class='col col-lg-2'>
   </div>
   <div class='col-md-auto'>
+    {% if pedidos %}
     <table class="table">
       <thead>
         <tr>
@@ -25,6 +26,10 @@
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <br><br>
+<h1>Nenhum pedido Encontrado</h1>
+{% endif %}
   </div>
   <div class='col col-lg-2'>
   </div>

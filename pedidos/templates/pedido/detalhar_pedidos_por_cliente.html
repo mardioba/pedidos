@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Pedidos{% endblock title %}
+
+{% block content %}
+  <div class='container text-center'>
+  <div class='row justify-content-md-center'>
+  <div class='col col-lg-2'>
+  </div>
+  <div class='col-md-auto'>
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Total por Pedido</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for pedido in pedidos %}
+      <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
+        <th scope="row"><a href="{% url 'pedidodetalhes' pedido.id %}">{{ pedido.id }}</a></th>
+        <td>{{ pedido.cliente }}</td>
+        <td>R$ {{ pedido.total }}</td>
+      </tr>
+      {% endfor %}
+      <tr><th colspan="2">Total</th>
+      <th>R$ {{ total }}</th></tr>
+  </table>
+  </div>
+  <div class='col col-lg-2'>
+  </div>
+  </div>
+{% endblock content %}
+
+  

@@ -28,6 +28,7 @@ class ItemPedidos(models.Model):
   pedido = models.ForeignKey(Pedidos, on_delete=models.CASCADE)
   produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
   quantidade = models.IntegerField()
+  preco = models.DecimalField(max_digits=8, decimal_places=2)
   
   def __str__(self):
     return str(self.pedido.pk)

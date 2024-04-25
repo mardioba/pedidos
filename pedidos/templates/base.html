@@ -45,8 +45,9 @@
                 Pedido
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Criar</a></li>
+                <li><a class="dropdown-item" href="{% url 'criarpedido' %}">Criar</a></li>
                 <li><a class="dropdown-item" href="{% url 'listarpedidos' %}">Listar</a></li>
+                <li><a class="dropdown-item" href="{% url 'pedidosporcliente' %}">Pedidos por cliente</a></li>
               </ul>
             </li>
           </ul>
