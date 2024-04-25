@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhe do Pedidos{% endblock title %}
+
+{% block content %}
+
+{% for item in itens %}
+  <li>{{ item.produto }}</li>
+  <li>{{ item.quantidade }}</li>
+  <li>R$ {{ item.produto.preco }}</li>
+  
+  <br>
+{% endfor %}
+<li>R$ {{ total }}</li>
+{% endblock content %}

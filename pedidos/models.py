@@ -1,3 +1,4 @@
+from typing import Any
 from django.db import models
 
 class Produto(models.Model):
@@ -14,3 +15,19 @@ class Cliente(models.Model):
 
   def __str__(self):
     return self.nome
+  
+class Pedidos(models.Model):
+  cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
+  total = models.DecimalField(max_digits=8, decimal_places=2)
+  datacreation = models.DateTimeField(auto_now_add=True)
+  
+  def __str__(self):
+    return str(self.cliente)
+
+class ItemPedidos(models.Model):
+  pedido = models.ForeignKey(Pedidos, on_delete=models.CASCADE)
+  produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
+  quantidade = models.IntegerField()
+  
+  def __str__(self):
+    return str(self.pedido.pk)

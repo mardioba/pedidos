@@ -1,5 +1,5 @@
 from django.shortcuts import render, HttpResponse, redirect
-from .models import Produto, Cliente
+from .models import Produto, Cliente, ItemPedidos, Pedidos
 from .forms import ProdutoForm, ClienteForm
 # Create your views here.
 def home(request):
@@ -55,7 +55,8 @@ def CadastrarProduto(request):
 
 def ListarProdutos(request):
   produtos = Produto.objects.all()
-  return render(request, 'produto/ListarProduto.html', {'produtos': produtos})
+  clientes = Cliente.objects.all()
+  return render(request, 'produto/ListarProduto.html', {'produtos': produtos, 'clientes': clientes})
 
 def ExcluirProduto(request, id):
   produto = Produto.objects.get(id=id)
@@ -71,3 +72,45 @@ def EditarProduto(request, id):
     if form.is_valid():
       form.save()
       return redirect('listarproduto')
+##### Pedidos ####
+def ProcessarFormulario(request):
+  return HttpResponse('Processando formulário...')
+
+def criar_pedido(request):
+    if request.method == 'POST':
+        cliente_id = request.POST.get('cliente_id')
+        selected_products = request.POST.getlist('selected_products[]')
+        total = 0
+        
+        if cliente_id is None:
+            return HttpResponse('ID do cliente não fornecido.')
+
+        # Criar o pedido
+        pedido = Pedidos.objects.create(cliente_id=cliente_id, total=total)
+
+        # Adicionar itens ao pedido
+        for item in selected_products:
+            produto_id, quantidade = item.split(':')
+            produto_id = int(produto_id)
+            quantidade = int(quantidade)
+            produto = Produto.objects.get(pk=produto_id)
+            total += produto.preco * quantidade
+            ItemPedidos.objects.create(pedido=pedido, produto=produto, quantidade=quantidade)
+
+        # Atualizar o total do pedido
+        pedido.total = total
+        pedido.save()
+
+        return HttpResponse('Pedido criado com sucesso!')
+    else:
+        return HttpResponse('Método não permitido!')
+
+def ListarPedidos(request):
+    pedidos = Pedidos.objects.all()
+    return render(request, 'pedido/ListarPedidos.html', {'pedidos': pedidos})
+
+def PedidoDetalhes(request, id):
+    itens = ItemPedidos.objects.filter(pedido=id)
+    total = Pedidos.objects.get(id=id).total
+    return render(request, 'pedido/PedidoDetalhes.html', {'itens': itens, 'total': total})
+    

@@ -1,35 +1,97 @@
 {% extends 'base.html' %}
 
 {% block title %}Lista de Clientes{% endblock title %}
+
 {% block content %}
-    <div class="container text-center">
-      <div class="row justify-content-md-center">
+<div class="container text-center">
+    <div class="row justify-content-md-center">
         <div class="col col-lg-2">
         </div>
         <div class="col-md-auto">
-          <h1>Lista de Clientes</h1>
-          <table class="table">
-            <thead>
-              <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Preço</th>
-                <th scope="col">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for produto in produtos %}
-              <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
-                <th scope="row">{{ produto.id }}</th>
-                <td>{{ produto.nome }}</td>
-                <td>{{ produto.preco }}</td>
-                <td><a href="{% url 'excluirproduto' produto.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'atualizarproduto' produto.id %}" class="btn btn-warning">Atualizar</a></td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+            <h1>Novo Pedido</h1>
+            <form id="pedido-form" method="post" action="{% url 'processar_formulario' %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="cliente" style="background: lightgray;font-weight: bold;">Cliente:</label>
+                    <select class="form-select form-select-lg mb-3 text-center" id="cliente" name="cliente_id" style="font-weight: bold;" required>
+                        {% for cliente in clientes %}
+                            <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <h2>Produtos Disponíveis</h2>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Preço</th>
+                            <th scope="col">Quantidade</th>
+                            <th scope="col">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for produto in produtos %}
+                            <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
+                                <th scope="row">{{ produto.id }}</th>
+                                <td>{{ produto.nome }}</td>
+                                <td>{{ produto.preco }}</td>
+                                <td>
+                                    <input type="number" min="1" value="1" class="form-control quantity-input" style="width: 60px;">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-primary add-product-btn" data-id="{{ produto.id }}" data-nome="{{ produto.nome }}" data-preco="{{ produto.preco }}">Adicionar</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <h2>Produtos Selecionados:</h2>
+                <ul id="selected-products"></ul>
+                <button type="submit" class="btn btn-primary">Enviar Pedido</button>
+            </form>
         </div>
         <div class="col col-lg-2">
         </div>
-      </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addProductButtons = document.querySelectorAll('.add-product-btn');
+        const pedidoForm = document.getElementById('pedido-form');
+
+        addProductButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const productId = button.dataset.id;
+                const productName = button.dataset.nome;
+                const productPrice = button.dataset.preco;
+                const quantity = button.parentElement.parentElement.querySelector('.quantity-input').value;
+                const clientName = document.getElementById('cliente').selectedOptions[0].innerText;
+
+                const selectedProductsList = document.getElementById('selected-products');
+                const listItem = document.createElement('li');
+                listItem.textContent = `Cliente: ${clientName} - Produto: ${productName} - R$ ${productPrice} - Quantidade: ${quantity}`;
+                listItem.dataset.id = productId;
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'selected_products[]';
+                hiddenInput.value = `${productId}:${quantity}`;
+
+                listItem.appendChild(hiddenInput);
+                selectedProductsList.appendChild(listItem);
+            });
+        });
+
+        pedidoForm.addEventListener('submit', function(event) {
+            event.preventDefault(); // Evita que o formulário seja enviado normalmente
+            // Aqui você pode adicionar qualquer lógica adicional antes de enviar o formulário, se necessário
+            this.submit(); // Submete o formulário
+        });
+    });
+</script>
+
+
+
 {% endblock content %}
