@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Clientes{% endblock title %}
+{% block content %}
+    <div class="container text-center">
+      <div class="row justify-content-md-center">
+        <div class="col col-lg-2">
+        </div>
+        <div class="col-md-auto">
+          <h1>Lista de Clientes</h1>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Preço</th>
+                <th scope="col">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for produto in produtos %}
+              <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
+                <th scope="row">{{ produto.id }}</th>
+                <td>{{ produto.nome }}</td>
+                <td>{{ produto.preco }}</td>
+                <td><a href="{% url 'excluirproduto' produto.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'atualizarproduto' produto.id %}" class="btn btn-warning">Atualizar</a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="col col-lg-2">
+        </div>
+      </div>
+{% endblock content %}
