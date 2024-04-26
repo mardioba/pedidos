@@ -1,8 +1,9 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
 from .models import Produto, Cliente, ItemPedidos, Pedidos
-from .forms import ProdutoForm, ClienteForm
+from .forms import ProdutoForm, ClienteForm, ItemPedidoForm, PedidoForm
 from decimal import Decimal
 from django.db.models import Sum
+from django.views.generic import View
 # Create your views here.
 def home(request):
   return render(request, 'home.html')
@@ -145,4 +146,78 @@ def detalhar_pedidos_por_cliente(request, cliente_id):
       }
     return render(request, 'pedido/detalhar_pedidos_por_cliente.html', context)
     
-  
+class PedidoEditView(View):
+    def get(self, request, pedido_id):
+        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        form = PedidoForm(instance=pedido)
+        return render(request, 'pedido/editar_pedido.html', {'form': form, 'pedido': pedido})
+
+    def post(self, request, pedido_id):
+        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        form = PedidoForm(request.POST, instance=pedido)
+        if form.is_valid():
+            form.save()
+
+            # Atualizar o total do pedido
+            pedido.atualizar_total()
+            
+            return redirect('detalhes_pedido', pedido_id=pedido_id)
+        return render(request, 'pedido/editar_pedido.html', {'form': form, 'pedido': pedido})
+
+class ItemPedidoEditView(View):
+    def get(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        form = ItemPedidoForm(instance=item_pedido)
+        return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
+
+    def post(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        form = ItemPedidoForm(request.POST, instance=item_pedido)
+        if form.is_valid():
+            form.save()
+
+            # Atualizar o total do pedido
+            item_pedido.pedido.atualizar_total()
+            
+            return redirect('pedidodetalhes', pedido_id=item_pedido.pedido_id)
+        return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
+
+class PedidoDeleteView(View):
+    def get(self, request, pedido_id):
+        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        return render(request, 'pedido/excluir_pedido.html', {'pedido': pedido})
+
+    def post(self, request, pedido_id):
+        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        pedido.delete()
+        return redirect('listarpedidos')
+
+class ItemPedidoEditView(View):
+    def get(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        form = ItemPedidoForm(instance=item_pedido)
+        return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
+
+    def post(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        form = ItemPedidoForm(request.POST, instance=item_pedido)
+        if form.is_valid():
+            form.save()
+            item_pedido.pedido.atualizar_total()  # Atualizar o total do pedido
+            return redirect('pedidodetalhes', id=item_pedido.pedido_id)  # Correção aqui
+        return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
+
+class ItemPedidoDeleteView(View):
+    def get(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        return render(request, 'pedido/excluir_item_pedido.html', {'item_pedido': item_pedido})
+
+    def post(self, request, item_pedido_id):
+        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        pedido_id = item_pedido.pedido_id
+        item_pedido.delete()
+
+        # Atualizar o total do pedido
+        item_pedido.pedido.atualizar_total()
+
+        return redirect('pedidodetalhes', id=pedido_id)

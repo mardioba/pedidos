@@ -23,6 +23,11 @@ class Pedidos(models.Model):
   
   def __str__(self):
     return str(self.cliente)
+  
+  def atualizar_total(self):
+      total_pedido = sum(item.quantidade * item.preco for item in self.itempedidos_set.all())
+      self.total = total_pedido
+      self.save()
 
 class ItemPedidos(models.Model):
   pedido = models.ForeignKey(Pedidos, on_delete=models.CASCADE)

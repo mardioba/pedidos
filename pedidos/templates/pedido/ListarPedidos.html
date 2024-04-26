@@ -15,6 +15,7 @@
           <th scope="col">ID</th>
           <th scope="col">Cliente</th>
           <th scope="col">Total</th>
+          <th scope="col">Ações</th>
         </tr>
       </thead>
       <tbody>
@@ -23,6 +24,7 @@
           <th scope="row"><a href="{% url 'pedidodetalhes' pedido.id %}">{{ pedido.id }}</a></th>
           <td>{{ pedido.cliente }}</td>
           <td>R$ {{ pedido.total }}</td>
+          <td><a href="{% url 'excluir_pedido' pedido.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'editar_pedido' pedido.id %}" class="btn btn-warning">Editar</a></td>
         </tr>
         {% endfor %}
     </table>

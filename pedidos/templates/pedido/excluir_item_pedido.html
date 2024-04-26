@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Excluir Item do Pedido{% endblock title %}
+{% block content %}
+    <h1>Excluir Item do Pedido</h1>
+    <p>Tem certeza que deseja excluir o item do pedido "{{ item_pedido }}"?</p>
+    <form action="{% url 'excluir_item_pedido' item_pedido.id %}" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmar</button>
+        <a href="javascript:history.back();" class="btn btn-warning">Cancelar</a>
+    </form>
+{% endblock content %}

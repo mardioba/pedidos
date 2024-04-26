@@ -19,6 +19,7 @@
         <th scope="col">Quantidade</th>
         <th scope="col">Preço</th>
         <th scope="col">total por item</th>
+        <th scope="col">Ações</th>
       </tr>
     </thead>
     <tbody>
@@ -29,6 +30,7 @@
         <td>{{ item.quantidade }}</td>
         <td>{{ item.produto.preco }}</td>
         <td>R$ {{ item.total|floatformat:2 }}</td>
+        <td><a href="{% url 'excluir_item_pedido' item.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning">Editar</a></td>
       </tr>
       {% endfor %}
       <tr>
