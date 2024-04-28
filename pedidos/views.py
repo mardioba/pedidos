@@ -1,10 +1,10 @@
 from django.shortcuts import render, HttpResponse, redirect, get_object_or_404
-from .models import Produto, Cliente, ItemPedidos, Pedidos
+from .models import Produto, Cliente, ItemPedido, Pedido
 from .forms import ProdutoForm, ClienteForm, ItemPedidoForm, PedidoForm
 from decimal import Decimal
 from django.db.models import Sum
 from django.views.generic import View
-# Create your views here.
+from django.forms.models import inlineformset_factory
 def home(request):
   return render(request, 'home.html')
 
@@ -87,7 +87,7 @@ def criar_pedido(request):
             return HttpResponse('ID do cliente não fornecido.')
 
         # Criar o pedido
-        pedido = Pedidos.objects.create(cliente_id=cliente_id, total=total)
+        pedido = Pedido.objects.create(cliente_id=cliente_id, total=total)
 
         # Adicionar itens ao pedido
         for item in selected_products:
@@ -97,7 +97,7 @@ def criar_pedido(request):
             produto = Produto.objects.get(pk=produto_id)
             preco = produto.preco
             total += produto.preco * quantidade
-            ItemPedidos.objects.create(pedido=pedido, produto=produto, quantidade=quantidade, preco=preco)
+            ItemPedido.objects.create(pedido=pedido, produto=produto, quantidade=quantidade, preco=preco)
 
         # Atualizar o total do pedido
         pedido.total = total
@@ -109,13 +109,13 @@ def criar_pedido(request):
         return HttpResponse('Método não permitido!')
 
 def ListarPedidos(request):
-    pedidos = Pedidos.objects.all()
+    pedidos = Pedido.objects.all()
     return render(request, 'pedido/ListarPedidos.html', {'pedidos': pedidos})
 
 def PedidoDetalhes(request, id):
-    itens = ItemPedidos.objects.filter(pedido=id)
-    cliente = Pedidos.objects.get(id=id).cliente
-    data = Pedidos.objects.get(id=id).datacreation
+    itens = ItemPedido.objects.filter(pedido=id)
+    cliente = Pedido.objects.get(id=id).cliente
+    data = Pedido.objects.get(id=id).datacreation
     total = Decimal(0)
     pedido = str(id).zfill(5)
     for item in itens:
@@ -131,12 +131,12 @@ def criarPedidos(request):
 
 def pedidos_por_cliente(request):
     # Agrupando os pedidos por cliente e calculando o total de cada cliente
-    pedidos_por_cliente = Pedidos.objects.values('cliente__id','cliente__nome').annotate(total_pedido=Sum('total'))
+    pedidos_por_cliente = Pedido.objects.values('cliente__id','cliente__nome').annotate(total_pedido=Sum('total'))
 
     return render(request, 'pedido/pedidos_por_cliente.html', {'pedidos_por_cliente': pedidos_por_cliente})
 
 def detalhar_pedidos_por_cliente(request, cliente_id):
-    pedidos = Pedidos.objects.filter(cliente_id=int(cliente_id))
+    pedidos = Pedido.objects.filter(cliente_id=int(cliente_id))
     total = Decimal(0)
     for item in pedidos:
         total = total + item.total
@@ -148,12 +148,12 @@ def detalhar_pedidos_por_cliente(request, cliente_id):
     
 class PedidoEditView(View):
     def get(self, request, pedido_id):
-        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        pedido = get_object_or_404(Pedido, pk=pedido_id)
         form = PedidoForm(instance=pedido)
         return render(request, 'pedido/editar_pedido.html', {'form': form, 'pedido': pedido})
 
     def post(self, request, pedido_id):
-        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        pedido = get_object_or_404(Pedido, pk=pedido_id)
         form = PedidoForm(request.POST, instance=pedido)
         if form.is_valid():
             form.save()
@@ -166,12 +166,12 @@ class PedidoEditView(View):
 
 class ItemPedidoEditView(View):
     def get(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         form = ItemPedidoForm(instance=item_pedido)
         return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
 
     def post(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         form = ItemPedidoForm(request.POST, instance=item_pedido)
         if form.is_valid():
             form.save()
@@ -184,22 +184,22 @@ class ItemPedidoEditView(View):
 
 class PedidoDeleteView(View):
     def get(self, request, pedido_id):
-        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        pedido = get_object_or_404(Pedido, pk=pedido_id)
         return render(request, 'pedido/excluir_pedido.html', {'pedido': pedido})
 
     def post(self, request, pedido_id):
-        pedido = get_object_or_404(Pedidos, pk=pedido_id)
+        pedido = get_object_or_404(Pedido, pk=pedido_id)
         pedido.delete()
         return redirect('listarpedidos')
 
 class ItemPedidoEditView(View):
     def get(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         form = ItemPedidoForm(instance=item_pedido)
         return render(request, 'pedido/editar_item_pedido.html', {'form': form, 'item_pedido': item_pedido})
 
     def post(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         form = ItemPedidoForm(request.POST, instance=item_pedido)
         if form.is_valid():
             form.save()
@@ -209,11 +209,11 @@ class ItemPedidoEditView(View):
 
 class ItemPedidoDeleteView(View):
     def get(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         return render(request, 'pedido/excluir_item_pedido.html', {'item_pedido': item_pedido})
 
     def post(self, request, item_pedido_id):
-        item_pedido = get_object_or_404(ItemPedidos, pk=item_pedido_id)
+        item_pedido = get_object_or_404(ItemPedido, pk=item_pedido_id)
         pedido_id = item_pedido.pedido_id
         item_pedido.delete()
 
@@ -221,3 +221,30 @@ class ItemPedidoDeleteView(View):
         item_pedido.pedido.atualizar_total()
 
         return redirect('pedidodetalhes', id=pedido_id)
+
+#### InlineTabular
+def inserir(request):
+  if request.method == 'GET':
+    form=PedidoForm()
+    form_pedidoitem_dactory = inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm, extra=1)
+    form_pedidoitem = form_pedidoitem_dactory()
+    context = {
+      'form': form,
+      'form_pedidoitem': form_pedidoitem
+      }
+    return render(request, 'pedido/add_form.html', context)
+  elif request.method == 'POST':
+    form = PedidoForm(request.POST)
+    form_pedidoitem_factoty =inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm)
+    form_pedidoitem = form_pedidoitem_factoty(request.POST)
+    if form.is_valid() and form_pedidoitem.is_valid():
+      pedido = form.save()
+      form_pedidoitem.instance = pedido
+      form_pedidoitem.save()
+      return HttpResponse('ok')
+    else:
+      context = {
+        'form': form,
+        'form_pedidoitem': form_pedidoitem,
+      }
+      return render(request, 'pedido/add_form.html', context)

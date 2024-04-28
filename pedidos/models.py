@@ -16,7 +16,7 @@ class Cliente(models.Model):
   def __str__(self):
     return self.nome
   
-class Pedidos(models.Model):
+class Pedido(models.Model):
   cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE)
   total = models.DecimalField(max_digits=8, decimal_places=2)
   datacreation = models.DateTimeField(auto_now_add=True)
@@ -29,8 +29,8 @@ class Pedidos(models.Model):
       self.total = total_pedido
       self.save()
 
-class ItemPedidos(models.Model):
-  pedido = models.ForeignKey(Pedidos, on_delete=models.CASCADE)
+class ItemPedido(models.Model):
+  pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE)
   produto = models.ForeignKey(Produto, on_delete=models.CASCADE)
   quantidade = models.IntegerField()
   preco = models.DecimalField(max_digits=8, decimal_places=2)

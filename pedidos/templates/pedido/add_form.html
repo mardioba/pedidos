@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block style %}
+
+  .estilo {
+    margin-bottom: 10px;
+  }
+
+{% endblock style %}
+  
+{% block content %}
+  <h1>Formulario de Cliente</h1>
+  
+  <div class="top-buffer">
+    <form method="post">
+      {% csrf_token %}
+
+      {{ form }}
+
+
+      {{ form_pedidoitem.management_form }}
+      {% for ft in form_pedidoitem %}
+      <div class="inlineform">
+        <hr>
+        {{ ft }}
+      </div>
+        <hr>
+        {% endfor %}
+<br>
+      <button class="btn btn-primary" type="submit">Salvar</button>
+      <a href="{% url 'listarpedidos' %}" class="btn btn-danger">Cancelar</a>
+  
+    </form>
+  </div>
+
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $(function() {
+      $('.inlineform').formset({
+          prefix: '{{ form_pedidoitem.prefix }}',
+          addText: '<span class="fa fa-plus"></span>',
+          deleteText: '<span class="fa fa-trash"></span>',
+          addCssClass: 'btn btn-primary',
+          deleteCssClass: 'btn btn-danger',
+      });
+  })
+</script>
+
+{% endblock scripts %}
+  

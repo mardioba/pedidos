@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Cliente, Produto, ItemPedidos, Pedidos
+from .models import Cliente, Produto, ItemPedido, Pedido
 
 class PedidoAdmin(admin.ModelAdmin):
   list_display = ('id','cliente', 'total', 'datacreation')
@@ -7,5 +7,5 @@ class PedidoAdmin(admin.ModelAdmin):
 
 admin.site.register(Cliente)
 admin.site.register(Produto)
-admin.site.register(ItemPedidos)
-admin.site.register(Pedidos, PedidoAdmin)
+admin.site.register(ItemPedido)
+admin.site.register(Pedido, PedidoAdmin)

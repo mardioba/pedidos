@@ -23,4 +23,5 @@ urlpatterns = [
     path('pedido/excluir/<int:pedido_id>/', views.PedidoDeleteView.as_view(), name='excluir_pedido'),
     # path('item_pedido/excluir/<int:item_pedido_id>/', views.ItemPedidoEditView.as_view(), name='excluir_item_pedido'),
     path('item_pedido/excluir/<int:item_pedido_id>/', views.ItemPedidoDeleteView.as_view(), name='excluir_item_pedido'),
+    path('add_pedido/',views.inserir, name='add_pedido'),
 ]
