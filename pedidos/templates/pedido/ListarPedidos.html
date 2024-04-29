@@ -3,6 +3,7 @@
 {% block title %}Lista de Pedidos{% endblock title %}
 
 {% block content %}
+<a href="{% url 'add_pedido' %}" data-toggle="tooltip" title="Adicionar"><div class="div-topo-direita"><span class="fa fa-plus fa-2x" style="color: blue"></span></div></a>
   <div class='container text-center'>
   <div class='row justify-content-md-center'>
   <div class='col col-lg-2'>
@@ -21,10 +22,10 @@
       <tbody>
         {% for pedido in pedidos %}
         <tr class={% cycle 'table-warning' 'table-secondary' 'table-info'%}>
-          <th scope="row"><a href="{% url 'pedidodetalhes' pedido.id %}">{{ pedido.id }}</a></th>
+          <th scope="row"><a href="{% url 'pedidodetalhes' pedido.id %}" data-toggle="tooltip" title="Detalhes do pedido">{{ pedido.id }}</a></th>
           <td>{{ pedido.cliente }}</td>
           <td>R$ {{ pedido.total }}</td>
-          <td><a href="{% url 'excluir_pedido' pedido.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'editar_pedido' pedido.id %}" class="btn btn-warning">Editar</a></td>
+          <td><a href="{% url 'excluir_pedido' pedido.id %}" class="btn btn-danger" data-toggle="tooltip" title="Excluir Pedido"><span class="fa fa-trash"></span></a> <a href="{% url 'editar_pedido' pedido.id %}" class="btn btn-warning" data-toggle="tooltip" title="Editar Pedido"><span class="fa fa-edit"></span></a></td>
         </tr>
         {% endfor %}
     </table>

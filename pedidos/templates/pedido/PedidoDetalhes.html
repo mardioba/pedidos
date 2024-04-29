@@ -3,7 +3,9 @@
 {% block title %}Detalhe do Pedidos{% endblock title %}
 
 {% block content %}
-
+<!--Botão Voltar -->-->
+<a href="{% url 'listarpedidos' %}" data-toggle="tooltip" title="Voltar"><div class="div-topo-direita"><i class="fa fa-arrow-left" aria-hidden="true"></i>
+</div></a>
 <div class='container text-center'>
 <div class='row justify-content-md-center'>
 <div class='col col-lg-2'>
@@ -30,7 +32,7 @@
         <td>{{ item.quantidade }}</td>
         <td>{{ item.produto.preco }}</td>
         <td>R$ {{ item.total|floatformat:2 }}</td>
-        <td><a href="{% url 'excluir_item_pedido' item.id %}" class="btn btn-danger">Excluir</a> <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning">Editar</a></td>
+        <td><a href="{% url 'excluir_item_pedido' item.id %}" class="btn btn-danger" data-toggle="tooltip" title="Excluir item do Pedido"><span class="fa fa-trash"></span></a> <a href="{% url 'editar_item_pedido' item.id %}" class="btn btn-warning" data-toggle="tooltip" title="Editar item do Pedido"><span class="fa fa-edit"></span></a></td>
       </tr>
       {% endfor %}
       <tr>

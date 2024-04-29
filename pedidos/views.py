@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.db.models import Sum
 from django.views.generic import View
 from django.forms.models import inlineformset_factory
+from django.db import transaction
 def home(request):
   return render(request, 'home.html')
 
@@ -121,7 +122,7 @@ def PedidoDetalhes(request, id):
     for item in itens:
         item.total = item.quantidade * item.produto.preco
         total += item.total
-    context = {'itens': itens, 'total': total, 'data': data, 'cliente': cliente, 'pedido': pedido}
+    context = {'itens': itens, 'total': total, 'data': data, 'cliente': cliente, 'pedido': pedido, 'id': id}
     return render(request, 'pedido/PedidoDetalhes.html', context)
 
 def criarPedidos(request):
@@ -223,28 +224,33 @@ class ItemPedidoDeleteView(View):
         return redirect('pedidodetalhes', id=pedido_id)
 
 #### InlineTabular
+@transaction.atomic
 def inserir(request):
-  if request.method == 'GET':
-    form=PedidoForm()
-    form_pedidoitem_dactory = inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm, extra=1)
-    form_pedidoitem = form_pedidoitem_dactory()
-    context = {
-      'form': form,
-      'form_pedidoitem': form_pedidoitem
-      }
-    return render(request, 'pedido/add_form.html', context)
-  elif request.method == 'POST':
-    form = PedidoForm(request.POST)
-    form_pedidoitem_factoty =inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm)
-    form_pedidoitem = form_pedidoitem_factoty(request.POST)
-    if form.is_valid() and form_pedidoitem.is_valid():
-      pedido = form.save()
-      form_pedidoitem.instance = pedido
-      form_pedidoitem.save()
-      return HttpResponse('ok')
-    else:
-      context = {
-        'form': form,
-        'form_pedidoitem': form_pedidoitem,
-      }
-      return render(request, 'pedido/add_form.html', context)
+    if request.method == 'GET':
+        form = PedidoForm()
+        form_pedidoitem_factory = inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm, extra=1)
+        form_pedidoitem = form_pedidoitem_factory()
+        context = {
+            'form': form,
+            'form_pedidoitem': form_pedidoitem
+        }
+        return render(request, 'pedido/add_form.html', context)
+    elif request.method == 'POST':
+        form = PedidoForm(request.POST)
+        form_pedidoitem_factory = inlineformset_factory(Pedido, ItemPedido, form=ItemPedidoForm)
+        form_pedidoitem = form_pedidoitem_factory(request.POST)
+        if form.is_valid() and form_pedidoitem.is_valid():
+            pedido = form.save(commit=False)  # Salvando o pedido sem commit
+
+            pedido.save()  # Salvando o pedido para gerar um ID
+            
+            form_pedidoitem.instance = pedido
+            form_pedidoitem.save()  # Salvando os itens do pedido
+
+            return redirect('listarpedidos')
+        else:
+            context = {
+                'form': form,
+                'form_pedidoitem': form_pedidoitem,
+            }
+            return render(request, 'pedido/add_form.html', context)

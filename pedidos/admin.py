@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import Cliente, Produto, ItemPedido, Pedido
 
 class PedidoAdmin(admin.ModelAdmin):
-  list_display = ('id','cliente', 'total', 'datacreation')
+  list_display = ('id','cliente', 'datacreation', 'total')
 
 
 admin.site.register(Cliente)

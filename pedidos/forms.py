@@ -18,4 +18,4 @@ class PedidoForm(forms.ModelForm):
 class ItemPedidoForm(forms.ModelForm):
     class Meta:
         model = ItemPedido
-        fields = ['pedido', 'produto', 'quantidade', 'preco']
+        fields = ['produto', 'quantidade']

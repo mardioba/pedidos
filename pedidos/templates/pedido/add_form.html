@@ -5,11 +5,15 @@
   .estilo {
     margin-bottom: 10px;
   }
+  .btnajuste {
+    margin-top: 60px;
+  }
 
 {% endblock style %}
   
 {% block content %}
-  <h1>Formulario de Cliente</h1>
+<a href="javascript:history.back()"><div class="div-topo-direita"><span class="fa fa-arrow-left fa-2x"></span></div></a>
+  <h1>Formulario de pedido</h1>
   
   <div class="top-buffer">
     <form method="post">
@@ -44,6 +48,7 @@
           deleteText: '<span class="fa fa-trash"></span>',
           addCssClass: 'btn btn-primary',
           deleteCssClass: 'btn btn-danger',
+
       });
   })
 </script>
